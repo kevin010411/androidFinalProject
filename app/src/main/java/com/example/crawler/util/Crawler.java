@@ -34,6 +34,7 @@ public class Crawler implements Runnable {
     public void run() {
         if(Url==null)
             return;
+
         if(!isDeepSearch) {
             try {
                 Connection con = Jsoup.connect(Url)

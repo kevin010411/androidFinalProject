@@ -34,7 +34,6 @@ public class filterListFragment extends Fragment {
     public filterListInterface filterListInterface;
 
     private View RootView;
-    private TextView test;
     private RecyclerView cardContainer;
     private FilterFragmentAdapter cardAdapter;
     private Vector<cardComponent> allCard;
@@ -55,8 +54,6 @@ public class filterListFragment extends Fragment {
         return allCard;
     }
 
-    public filterListFragment() {
-    }
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -69,7 +66,6 @@ public class filterListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         RootView = inflater.inflate(R.layout.filter_list_fragment, container, false);
-        test = RootView.findViewById(R.id.TestText);
         return RootView;
     }
 
@@ -113,6 +109,7 @@ public class filterListFragment extends Fragment {
     }
 
     private Vector<cardComponent> getDataFromUrl(ArrayList<String> UrlList) {
+
         ArrayList<ArrayList<Document>> allDocument = new ArrayList<>();
         for (String Url : UrlList) {
             crawler = new Crawler(Url, true);
@@ -135,6 +132,7 @@ public class filterListFragment extends Fragment {
                 for (Element temp : form) {
                     cardComponent tempComp = new cardComponent(RootView.getContext());
                     tempComp.setTitleText(temp.text());
+                    tempComp.setContentURL("http://www.wikicfp.com"+temp.attr("href"));
                     tempCard.add(tempComp);
                     //Log.i("Test",temp.text());
                 }

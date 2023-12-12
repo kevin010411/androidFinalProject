@@ -16,7 +16,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
+import com.example.crawler.Fragment.ContentFragment;
 import com.example.crawler.util.Crawler;
 import com.example.crawler.util.util;
 import com.google.android.material.navigation.NavigationView;
@@ -33,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private Crawler crawler;
     private DrawerLayout mainLayout;
     private NavigationView drawerView;
-    private LinearLayout cardContainer;
+    public LinearLayout cardContainer;
     private Toolbar TopBar;
 
     @Override
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
             for (Element temp : form) {
                 cardComponent tempComp = new cardComponent(MainActivity.this);
                 tempComp.setTitleText(temp.text());
+                tempComp.setContentURL("http://www.wikicfp.com"+temp.attr("href"));
                 allCard.add(tempComp);
                 //Log.i("Test",temp.text());
             }
@@ -151,6 +155,20 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    public void changeFragment(Class fragmentClass,String url) {
+        Fragment fragment = null;
+        if (fragmentClass.equals(ContentFragment.class)) {
+            fragment = (Fragment) ContentFragment.newInstance(url);
+        }
+
+        if(fragment!=null) {
+            cardContainer.setVisibility(View.INVISIBLE);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction().add(R.id.ContentView, fragment)
+                    .commit();
+        }
+    }
 }
 
 

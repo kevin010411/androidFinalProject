@@ -6,13 +6,15 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.fragment.app.FragmentManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.example.crawler.Fragment.ContentFragment;
 import com.google.android.material.chip.Chip;
 
 public class cardComponent extends ConstraintLayout {
@@ -20,9 +22,13 @@ public class cardComponent extends ConstraintLayout {
     public String WhenStr;
     public String WhereStr;
     public Context nowContext;
+
     public TextView title;
     public TextView deadLine;
     public Chip FavoriteButton;
+
+    public String ContentURL;
+
     public cardComponent(@NonNull Context context) {
         super(context);
         nowContext = context;
@@ -69,23 +75,44 @@ public class cardComponent extends ConstraintLayout {
                 Log.i("Test","Clicked"+chip.getChipIcon().toString());
             }
         });
+
+        findViewById(R.id.Card).setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                Context nowContext = view.getContext();
+                if(nowContext instanceof MainActivity) {
+                    MainActivity now = (MainActivity) nowContext;
+                    now.changeFragment(ContentFragment.class,ContentURL);
+                }
+                else if(nowContext instanceof categoryActivity){
+                    categoryActivity now = (categoryActivity) nowContext;
+                    now.changeFragment(ContentFragment.class,ContentURL);
+                }
+                //Log.i("Test","Click URL: "+nowContext.toString());
+            }
+        });
+
         //Title.setText(textString);
     }
     public void setTitleText(String str)
     {
+        textString=str;
         title.setText(str);
     }
     public void setDeadLine(String str) { deadLine.setText(str); }
     public void setWhen(String str){WhenStr=str;}
     public void setWhere(String str){WhereStr=str;}
-
+    public void setContentURL(String url){
+        ContentURL=url;
+    }
     public void setCard(cardComponent copyCard)
     {
         title.setText(copyCard.title.getText());
         WhenStr = copyCard.WhenStr;
         WhereStr = copyCard.WhereStr;
         deadLine.setText(copyCard.deadLine.getText());
-
+        ContentURL = copyCard.ContentURL;
     }
 
     @Override

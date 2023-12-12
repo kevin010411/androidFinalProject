@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -16,6 +17,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.gridlayout.widget.GridLayout;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -23,6 +25,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.crawler.Adapter.CategoryAdapter;
+import com.example.crawler.Fragment.ContentFragment;
 import com.example.crawler.Fragment.chartFragment;
 import com.example.crawler.Fragment.filterListFragment;
 import com.example.crawler.util.Crawler;
@@ -46,11 +49,12 @@ public class categoryActivity extends AppCompatActivity
     private Vector<cardComponent> allInfo;
 
     private FragmentTransaction fragmentTransaction;
-    private Fragment fragment;
+    public Fragment fragment;
     private DrawerLayout mainLayout;
     private NavigationView drawerView;
     private GridLayout pickedContainer;
     private Toolbar TopBar;
+    private ProgressBar progressBar;
 
     private RecyclerView categoryContainer;
     private CategoryAdapter categoryAdapter;
@@ -76,6 +80,8 @@ public class categoryActivity extends AppCompatActivity
             }
         });
 
+        progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.INVISIBLE);
 
         //add side menu listener
         drawerView = (NavigationView) findViewById(R.id.side_menu);
@@ -199,9 +205,6 @@ public class categoryActivity extends AppCompatActivity
                 return false;
             }
         });
-        /*
-            TO-DO 檢查開啟和關閉時是否為同一個組合
-         */
         searchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -220,35 +223,30 @@ public class categoryActivity extends AppCompatActivity
                 if(!searchView.isIconified())
                     searchView.onActionViewCollapsed();
 
-                updateList();
+                progressBar.setVisibility(View.VISIBLE);
 
                 categoryContainer.setVisibility(View.INVISIBLE);
                 fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.show(fragment);
                 fragmentTransaction.commit();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateList();
+                        progressBar.setVisibility(View.INVISIBLE);
+                    }
+                }).start();
+
 
                 return true;
             }
         });
 
-        /*
-        我的最愛功能(概閱)
-            1.切換模式
-            2.紀錄我的最愛
-            3.從我的最愛(紀錄每個最愛的名稱和時間，還有類別)篩選(截止日期和類別)
-         */
 
-
-        /*
-        顯示統計圖表(概要)
-            1.獲取所有截止時間
-            2.統計並顯示
-         */
 
     }
 
-    private void pickedStringToUrlString()
-    {
+    private void pickedStringToUrlString() {
         for(int i=0;i<pickedString.size();++i)
         {
             String temp = pickedString.get(i);
@@ -280,15 +278,13 @@ public class categoryActivity extends AppCompatActivity
         //Log.i("Test",Integer.toString(prePickedString.size())+" to "+Integer.toString(pickedString.size()));
         if(isPickTagSame(pickedString,prePickedString))
             return;
-
         if(fragment instanceof filterListFragment)
             ((filterListFragment) fragment).updateList();
         else if(fragment instanceof chartFragment)
             ((chartFragment)fragment).updateChart();
     }
 
-    private boolean isPickTagSame(ArrayList<String> a,ArrayList<String> b)
-    {
+    private boolean isPickTagSame(ArrayList<String> a,ArrayList<String> b) {
         if(a.size()!=b.size())
             return false;
         for(String str : a)
@@ -309,5 +305,21 @@ public class categoryActivity extends AppCompatActivity
             allInfo=((filterListFragment)fragment).getData();
         else if(fragment instanceof chartFragment)
             allInfo=((chartFragment)fragment).getData();
+    }
+
+
+    public void changeFragment(Class fragmentClass,String url) {
+        Log.i("Test","Category clicked");
+        Fragment nowFragment = null;
+        if (fragmentClass.equals(ContentFragment.class)) {
+            nowFragment = (Fragment) ContentFragment.newInstance(url);
+        }
+
+        if(fragment!=null) {
+            fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.hide(fragment);
+            fragmentTransaction.add(R.id.fragmentContainer, nowFragment)
+                    .commit();
+        }
     }
 }
