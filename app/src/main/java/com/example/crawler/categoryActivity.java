@@ -55,6 +55,8 @@ public class categoryActivity extends AppCompatActivity
     private GridLayout pickedContainer;
     private Toolbar TopBar;
     private ProgressBar progressBar;
+    public int count;
+    public boolean[]love;
 
     private RecyclerView categoryContainer;
     private CategoryAdapter categoryAdapter;
@@ -63,6 +65,18 @@ public class categoryActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.category_page);
+
+        //TODO: 接過MainActivity的Intent不一定會在搜尋上面，用陣列存會出錯
+        Intent initIntent=getIntent();
+        count=initIntent.getIntExtra("count",20);
+        love=new boolean[count];
+        Bundle allData=initIntent.getBundleExtra("allData");
+        //if(allData!=null){
+        Bundle loveData=allData.getBundle("love");
+        for(int i=0;i<count;i++) {
+            love[i] = loveData.getBoolean(String.valueOf(i));
+            Log.i("love",String.valueOf(i)+String.valueOf(love[i]));
+        }
 
         allInfo=null;
         //add listener to mainLayout
@@ -92,6 +106,17 @@ public class categoryActivity extends AppCompatActivity
                 switch (item.toString()) {
                     case "首頁":
                         Intent nextIntent = new Intent(categoryActivity.this,MainActivity.class);
+                        int index=0;
+                        Bundle allData=new Bundle();
+                        Bundle loveData=new Bundle();
+                        for(boolean temp:love){
+                            //Log.i("love",String.valueOf(index++)+String.valueOf(temp));
+                            loveData.putBoolean(String.valueOf(temp),temp);
+                        }
+                        allData.putBundle("love",loveData);
+                        nextIntent.putExtra("allData",allData);
+                        nextIntent.putExtra("status",item.toString());
+                        nextIntent.putExtra("count",count);
                         startActivity(nextIntent);
                         break;
                     case "分類":
@@ -110,6 +135,9 @@ public class categoryActivity extends AppCompatActivity
                         fragmentTransaction.replace(R.id.fragmentContainer,fragment);
                         fragmentTransaction.commit();
                         break;
+                    case "關於":
+                        nextIntent = new Intent(categoryActivity.this, aboutpageActivity.class);
+                        startActivity(nextIntent);
                     default:
                         Log.e("未知去向", "前往未知去向");
                         break;

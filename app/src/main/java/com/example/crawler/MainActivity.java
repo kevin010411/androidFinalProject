@@ -38,14 +38,27 @@ public class MainActivity extends AppCompatActivity {
     private NavigationView drawerView;
     public LinearLayout cardContainer;
     private Toolbar TopBar;
+    public int count=0;
+    public boolean[]love;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
 
+        Intent initIntent=getIntent();
+        count=initIntent.getIntExtra("count",20);
+        love=new boolean[count];
+        Bundle allData=initIntent.getBundleExtra("allData");
+        if(allData!=null){
+            Bundle loveData=allData.getBundle("love");
+            for(int i=0;i<count;i++)
+                love[i]=loveData.getBoolean(String.valueOf(i));
+        }
+
         //fetch web data
         crawler = new Crawler(HomeUrl);
+        Vector<cardComponent> allCard = new Vector<cardComponent>();
         if(util.isNetworkAvailable(this)) {
             Thread crawlerThread = new Thread(crawler);
             crawlerThread.start();
@@ -58,8 +71,8 @@ public class MainActivity extends AppCompatActivity {
             Document doc = crawler.getDoc();
             cardContainer = (LinearLayout) findViewById(R.id.card_container);
             Elements form = doc.select(".contsec").select("td > a");
-            Vector<cardComponent> allCard = new Vector<cardComponent>();
             for (Element temp : form) {
+                count+=1;
                 cardComponent tempComp = new cardComponent(MainActivity.this);
                 tempComp.setTitleText(temp.text());
                 tempComp.setContentURL("http://www.wikicfp.com"+temp.attr("href"));
@@ -123,10 +136,23 @@ public class MainActivity extends AppCompatActivity {
                     case "分類":
                     case "統計圖表":
                         Intent nextIntent = new Intent(MainActivity.this,categoryActivity.class);
+                        int index=0;
+                        Bundle allData=new Bundle();
+                        Bundle loveData=new Bundle();
+                        for(cardComponent temp:allCard) {
+                            Log.i("allCard",String.valueOf(index)+String.valueOf(temp.love));
+                            loveData.putBoolean(String.valueOf(allCard.get(index++).love), temp.love);
+                        }
+                        allData.putBundle("love",loveData);
+                        nextIntent.putExtra("allData",allData);
                         nextIntent.putExtra("status",item.toString());
+                        nextIntent.putExtra("count",count);
                         startActivity(nextIntent);
                         finish();
                         break;
+                    case "關於":
+                        nextIntent = new Intent(MainActivity.this,aboutpageActivity.class);
+                        startActivity(nextIntent);
                     default:
                         Log.e("未知去向", "前往未知去向");
                         break;

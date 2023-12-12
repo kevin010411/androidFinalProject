@@ -26,7 +26,7 @@ public class cardComponent extends ConstraintLayout {
     public TextView title;
     public TextView deadLine;
     public Chip FavoriteButton;
-
+    public boolean love;
     public String ContentURL;
 
     public cardComponent(@NonNull Context context) {
@@ -64,14 +64,26 @@ public class cardComponent extends ConstraintLayout {
         FavoriteButton = (Chip) findViewById(R.id.favoriteButton);
         Drawable fillFavorite = getResources().getDrawable(R.drawable.favorite, nowContext.getTheme());
         Drawable emptyFavorite = getResources().getDrawable(R.drawable.unfill_favorite, nowContext.getTheme());
+        if (love) {
+            FavoriteButton.setText("我的最愛");
+            FavoriteButton.setChipIcon(fillFavorite);
+        }else{
+            FavoriteButton.setChipIcon(emptyFavorite);
+            FavoriteButton.setText("加入最愛");
+        }
         FavoriteButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 Chip chip = (Chip)view;
-                if(chip.getChipIcon().equals(fillFavorite))
+                if (love) {
                     chip.setChipIcon(emptyFavorite);
-                else
+                    chip.setText("加入最愛");
+                    love=false;
+                } else {
                     chip.setChipIcon(fillFavorite);
+                    chip.setText("我的最愛");
+                    love = true;
+                }
                 Log.i("Test","Clicked"+chip.getChipIcon().toString());
             }
         });
