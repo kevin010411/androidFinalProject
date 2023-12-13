@@ -1,6 +1,7 @@
 package com.example.crawler;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -40,25 +41,19 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar TopBar;
     public int count=0;
     public boolean[]love;
+    public String s;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
+        Vector<cardComponent> allCard = new Vector<cardComponent>();
 
-        Intent initIntent=getIntent();
-        count=initIntent.getIntExtra("count",20);
-        love=new boolean[count];
-        Bundle allData=initIntent.getBundleExtra("allData");
-        if(allData!=null){
-            Bundle loveData=allData.getBundle("love");
-            for(int i=0;i<count;i++)
-                love[i]=loveData.getBoolean(String.valueOf(i));
-        }
+        SharedPreferences sharePre=getSharedPreferences("loveData",MODE_PRIVATE);
+
 
         //fetch web data
         crawler = new Crawler(HomeUrl);
-        Vector<cardComponent> allCard = new Vector<cardComponent>();
         if(util.isNetworkAvailable(this)) {
             Thread crawlerThread = new Thread(crawler);
             crawlerThread.start();
@@ -105,6 +100,19 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
+            if(sharePre!=null) {
+                count = sharePre.getInt("count", 0);
+                if (count != 0) {
+                    s = sharePre.getString("love", "");
+                    for(int i=0;i<count;i++) {
+                        if (s.charAt(i) == 'T') allCard.elementAt(i).love = true;
+                        else allCard.elementAt(i).love=false;
+                    }
+                }
+            }
+            for(cardComponent temp:allCard){
+                temp.setlove();
+            }
         }
         //Log.i("Tested", form.toString());
 
@@ -136,22 +144,37 @@ public class MainActivity extends AppCompatActivity {
                     case "分類":
                     case "統計圖表":
                         Intent nextIntent = new Intent(MainActivity.this,categoryActivity.class);
-                        int index=0;
-                        Bundle allData=new Bundle();
-                        Bundle loveData=new Bundle();
-                        for(cardComponent temp:allCard) {
-                            Log.i("allCard",String.valueOf(index)+String.valueOf(temp.love));
-                            loveData.putBoolean(String.valueOf(allCard.get(index++).love), temp.love);
+                        String s1="";
+                        for(int i=0;i<count;i++){
+                            if(allCard.get(i).love==true)s1+='T';
+                            else s1+='F';
                         }
-                        allData.putBundle("love",loveData);
-                        nextIntent.putExtra("allData",allData);
-                        nextIntent.putExtra("status",item.toString());
-                        nextIntent.putExtra("count",count);
+
+                        SharedPreferences sharedPre=getSharedPreferences("loveData",MODE_PRIVATE);
+                        SharedPreferences.Editor editor= sharedPre.edit();
+
+                        editor.putInt("count",count);
+                        editor.putString("love",s1);
+                        editor.putString("status",item.toString());
+                        editor.apply();
                         startActivity(nextIntent);
                         finish();
                         break;
                     case "關於":
                         nextIntent = new Intent(MainActivity.this,aboutpageActivity.class);
+                        String s2="";
+                        for(int i=0;i<count;i++){
+                            if(allCard.get(i).love==true)s2+='T';
+                            else s2+='F';
+                        }
+
+                        SharedPreferences sharedPre1=getSharedPreferences("loveData",MODE_PRIVATE);
+                        SharedPreferences.Editor editor1= sharedPre1.edit();
+
+                        editor1.putInt("count",count);
+                        editor1.putString("love",s2);
+                        editor1.putString("status",item.toString());
+                        editor1.apply();
                         startActivity(nextIntent);
                     default:
                         Log.e("未知去向", "前往未知去向");

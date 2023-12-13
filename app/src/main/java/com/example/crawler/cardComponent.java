@@ -112,6 +112,15 @@ public class cardComponent extends ConstraintLayout {
         textString=str;
         title.setText(str);
     }
+    public void setlove(){
+        if (love) {
+            FavoriteButton.setText("我的最愛");
+            FavoriteButton.setChipIconResource(R.drawable.favorite);
+        }else{
+            FavoriteButton.setChipIconResource(R.drawable.unfill_favorite);
+            FavoriteButton.setText("加入最愛");
+        }
+    }
     public void setDeadLine(String str) { deadLine.setText(str); }
     public void setWhen(String str){WhenStr=str;}
     public void setWhere(String str){WhereStr=str;}

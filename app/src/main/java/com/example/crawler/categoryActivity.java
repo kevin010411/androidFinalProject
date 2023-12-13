@@ -1,6 +1,7 @@
 package com.example.crawler;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -67,15 +68,15 @@ public class categoryActivity extends AppCompatActivity
         setContentView(R.layout.category_page);
 
         //TODO: 接過MainActivity的Intent不一定會在搜尋上面，用陣列存會出錯
-        Intent initIntent=getIntent();
-        count=initIntent.getIntExtra("count",20);
+        SharedPreferences sharePre=getSharedPreferences("loveData",MODE_PRIVATE);
+        count=sharePre.getInt("count",0);
+
+        String s=sharePre.getString("love","");
+
         love=new boolean[count];
-        Bundle allData=initIntent.getBundleExtra("allData");
-        //if(allData!=null){
-        Bundle loveData=allData.getBundle("love");
-        for(int i=0;i<count;i++) {
-            love[i] = loveData.getBoolean(String.valueOf(i));
-            Log.i("love",String.valueOf(i)+String.valueOf(love[i]));
+        for(int i=0;i<count;i++){
+            if(s.charAt(i)=='T')love[i]=true;
+            else love[i]=false;
         }
 
         allInfo=null;
@@ -106,17 +107,20 @@ public class categoryActivity extends AppCompatActivity
                 switch (item.toString()) {
                     case "首頁":
                         Intent nextIntent = new Intent(categoryActivity.this,MainActivity.class);
-                        int index=0;
-                        Bundle allData=new Bundle();
-                        Bundle loveData=new Bundle();
-                        for(boolean temp:love){
-                            //Log.i("love",String.valueOf(index++)+String.valueOf(temp));
-                            loveData.putBoolean(String.valueOf(temp),temp);
+                        String s="";
+                        for(int i=0;i<count;i++){
+                            if(love[i]==true)s+='T';
+                            else s+='F';
                         }
-                        allData.putBundle("love",loveData);
-                        nextIntent.putExtra("allData",allData);
-                        nextIntent.putExtra("status",item.toString());
-                        nextIntent.putExtra("count",count);
+
+                        SharedPreferences sharedPre=getSharedPreferences("loveData",MODE_PRIVATE);
+                        SharedPreferences.Editor editor= sharedPre.edit();
+                        Log.i("lovecate2",s);
+
+                        editor.putInt("count",count);
+                        editor.putString("love",s);
+                        editor.putString("status",item.toString());
+                        editor.apply();
                         startActivity(nextIntent);
                         break;
                     case "分類":
@@ -178,9 +182,10 @@ public class categoryActivity extends AppCompatActivity
 
 
         //default Fragment
-        TopBar.setTitle(getIntent().getStringExtra("status"));
+        String status=sharePre.getString("status","");
+        TopBar.setTitle(status);
         fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        if(getIntent().getStringExtra("status").equals("統計圖表"))
+        if(status=="統計圖表")
             fragment = new chartFragment();
         else
             fragment = new filterListFragment();
