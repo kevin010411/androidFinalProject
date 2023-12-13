@@ -84,7 +84,7 @@ public class cardComponent extends ConstraintLayout {
                     chip.setText("我的最愛");
                     love = true;
                 }
-                Log.i("Test","Clicked"+chip.getChipIcon().toString());
+                //Log.i("Test","Clicked "+chip.getChipIcon().toString());
             }
         });
 

@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sharePre=getSharedPreferences("loveData",MODE_PRIVATE);
 
-
         //fetch web data
         crawler = new Crawler(HomeUrl);
         if(util.isNetworkAvailable(this)) {
@@ -104,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 count = sharePre.getInt("count", 0);
                 if (count != 0) {
                     s = sharePre.getString("love", "");
+                    Log.i("Test",s.toString());
                     for(int i=0;i<count;i++) {
                         if (s.charAt(i) == 'T') allCard.elementAt(i).love = true;
                         else allCard.elementAt(i).love=false;
@@ -144,12 +144,12 @@ public class MainActivity extends AppCompatActivity {
                     case "分類":
                     case "統計圖表":
                         Intent nextIntent = new Intent(MainActivity.this,categoryActivity.class);
+                        count=allCard.size();
                         String s1="";
                         for(int i=0;i<count;i++){
                             if(allCard.get(i).love==true)s1+='T';
                             else s1+='F';
                         }
-
                         SharedPreferences sharedPre=getSharedPreferences("loveData",MODE_PRIVATE);
                         SharedPreferences.Editor editor= sharedPre.edit();
 
