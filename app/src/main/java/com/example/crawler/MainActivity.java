@@ -103,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
                 count = sharePre.getInt("count", 0);
                 if (count != 0) {
                     s = sharePre.getString("love", "");
-                    Log.i("Test",s.toString());
                     for(int i=0;i<count;i++) {
                         if (s.charAt(i) == 'T') allCard.elementAt(i).love = true;
                         else allCard.elementAt(i).love=false;

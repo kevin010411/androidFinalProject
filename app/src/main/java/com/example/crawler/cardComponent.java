@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.crawler.Fragment.ContentFragment;
+import com.example.crawler.util.favoriteDB;
 import com.google.android.material.chip.Chip;
 
 public class cardComponent extends ConstraintLayout {
@@ -28,6 +29,7 @@ public class cardComponent extends ConstraintLayout {
     public Chip FavoriteButton;
     public boolean love;
     public String ContentURL;
+
 
     public cardComponent(@NonNull Context context) {
         super(context);
@@ -59,6 +61,7 @@ public class cardComponent extends ConstraintLayout {
     private void initViews()
     {
         inflate(nowContext,R.layout.card_component,this);
+
         title = (TextView) findViewById(R.id.titleText);
         deadLine = (TextView) findViewById(R.id.DeadLine);
         FavoriteButton = (Chip) findViewById(R.id.favoriteButton);
@@ -74,15 +77,27 @@ public class cardComponent extends ConstraintLayout {
         FavoriteButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                favoriteDB DB=null;
+                cardComponent parent = (cardComponent) view.getParent().getParent();
+                if(view.getContext() instanceof categoryActivity){
+                    categoryActivity root = (categoryActivity) view.getContext();
+                    DB = root.DataBase;
+                }
                 Chip chip = (Chip)view;
                 if (love) {
                     chip.setChipIcon(emptyFavorite);
                     chip.setText("加入最愛");
                     love=false;
+                    if(DB!=null){
+                        DB.deleteData(parent);
+                    }
                 } else {
                     chip.setChipIcon(fillFavorite);
                     chip.setText("我的最愛");
                     love = true;
+                    if(DB!=null){
+                        DB.AddData(parent);
+                    }
                 }
                 //Log.i("Test","Clicked "+chip.getChipIcon().toString());
             }
@@ -110,10 +125,21 @@ public class cardComponent extends ConstraintLayout {
     public void setTitleText(String str)
     {
         textString=str;
-        title.setText(str);
+        title.setText(textString);
     }
     public void setlove(){
         if (love) {
+            FavoriteButton.setText("我的最愛");
+            FavoriteButton.setChipIconResource(R.drawable.favorite);
+            Log.i("Test",FavoriteButton.getText().toString());
+        }else{
+            FavoriteButton.setChipIconResource(R.drawable.unfill_favorite);
+            FavoriteButton.setText("加入最愛");
+        }
+    }
+    public void setLove(Boolean now){
+        love=now;
+        if (now) {
             FavoriteButton.setText("我的最愛");
             FavoriteButton.setChipIconResource(R.drawable.favorite);
         }else{
@@ -121,7 +147,10 @@ public class cardComponent extends ConstraintLayout {
             FavoriteButton.setText("加入最愛");
         }
     }
-    public void setDeadLine(String str) { deadLine.setText(str); }
+    public void setDeadLine(String str) {
+        deadLine.setText(str);
+        setWhere(str);
+    }
     public void setWhen(String str){WhenStr=str;}
     public void setWhere(String str){WhereStr=str;}
     public void setContentURL(String url){
@@ -130,6 +159,7 @@ public class cardComponent extends ConstraintLayout {
     public void setCard(cardComponent copyCard)
     {
         title.setText(copyCard.title.getText());
+        textString = copyCard.textString;
         WhenStr = copyCard.WhenStr;
         WhereStr = copyCard.WhereStr;
         deadLine.setText(copyCard.deadLine.getText());

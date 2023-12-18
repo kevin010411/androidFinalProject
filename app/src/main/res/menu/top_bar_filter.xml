@@ -9,7 +9,7 @@
         app:showAsAction="always"/>
     <item android:id="@+id/changeMode"
         android:title="favorite"
-        android:icon="@drawable/favorite"
+        android:icon="@drawable/filter_icon"
         android:orderInCategory="2"
         app:showAsAction="ifRoom"/>
     <item android:id="@+id/searchInput"

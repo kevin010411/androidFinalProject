@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
@@ -31,6 +32,7 @@ import com.example.crawler.Fragment.chartFragment;
 import com.example.crawler.Fragment.filterListFragment;
 import com.example.crawler.util.Crawler;
 
+import com.example.crawler.util.favoriteDB;
 import com.google.android.material.navigation.NavigationView;
 
 import org.jsoup.nodes.Document;
@@ -38,12 +40,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Vector;
 
 public class categoryActivity extends AppCompatActivity
         implements filterListFragment.filterListInterface {
-
     private final String categoryUrl = "http://www.wikicfp.com/cfp/allcat";
     private ArrayList<String> prePickedString;
     private ArrayList<String> pickedString;
@@ -59,6 +61,9 @@ public class categoryActivity extends AppCompatActivity
     public int count;
     public boolean[]love;
 
+    public boolean isFavoriteMode;
+    public favoriteDB DataBase;
+
     private RecyclerView categoryContainer;
     private CategoryAdapter categoryAdapter;
 
@@ -67,7 +72,6 @@ public class categoryActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.category_page);
 
-        //TODO: 接過MainActivity的Intent不一定會在搜尋上面，用陣列存會出錯
         SharedPreferences sharePre=getSharedPreferences("loveData",MODE_PRIVATE);
         count=sharePre.getInt("count",0);
 
@@ -80,6 +84,10 @@ public class categoryActivity extends AppCompatActivity
         }
 
         allInfo=null;
+        isFavoriteMode=false;
+        DataBase = new favoriteDB(this,"favoriteDB",null,4);
+        DataBase.checkTable();
+        //DataBase.clearData();
         //add listener to mainLayout
         mainLayout = (DrawerLayout) findViewById(R.id.main_layout);
         mainLayout.addDrawerListener(new ActionBarDrawerToggle(this, mainLayout ,
@@ -163,14 +171,20 @@ public class categoryActivity extends AppCompatActivity
                         break;
                     case "favorite":
                     case "filter":
-                        if(Objects.equals(item.toString(), "filter")) {
+                        if(fragment instanceof chartFragment)
+                            return true;
+                        if(!isFavoriteMode) {
                             item.setTitle("favorite");
                             item.setIcon(R.drawable.favorite);
+                            isFavoriteMode=true;
                         }
                         else {
                             item.setTitle("filter");
                             item.setIcon(R.drawable.filter_icon);
+                            isFavoriteMode=false;
                         }
+                        getChildData();
+                        updateList();
                         break;
                     default:
                         Log.i("Test", item.toString());
@@ -296,10 +310,31 @@ public class categoryActivity extends AppCompatActivity
 
     @Override
     public Vector<cardComponent> getData() {
-        return allInfo;
+        if(!isFavoriteMode)
+            return allInfo;
+        else
+            return new Vector<>();
     }
 
     public void updateList() {
+        if(isFavoriteMode){
+            Vector<Map<String,String>> data = DataBase.allFavoriteData();
+            Vector<cardComponent> favoriteCard = new Vector<>();
+            for(int i=0;i<data.size();++i){
+                cardComponent now = new cardComponent(this);
+                now.setDeadLine(data.get(i).get("Deadline"));
+                now.setWhere(data.get(i).get("Location"));
+                now.setTitleText(data.get(i).get("Title"));
+                now.setContentURL(data.get(i).get("ContentURL"));
+                now.setLove(true);
+                //now.FavoriteButton.setEnabled(false);
+                favoriteCard.add(now);
+            }
+            if(fragment instanceof filterListFragment) {
+                ((filterListFragment) fragment).showList(favoriteCard);
+                return;
+            }
+        }
         prePickedString = new ArrayList<>();
         for(String str:pickedString)
             prePickedString.add(str);
@@ -309,12 +344,18 @@ public class categoryActivity extends AppCompatActivity
 
         pickedStringToUrlString();
         //Log.i("Test",Integer.toString(prePickedString.size())+" to "+Integer.toString(pickedString.size()));
-        if(isPickTagSame(pickedString,prePickedString))
-            return;
-        if(fragment instanceof filterListFragment)
-            ((filterListFragment) fragment).updateList();
-        else if(fragment instanceof chartFragment)
-            ((chartFragment)fragment).updateChart();
+        if(isPickTagSame(pickedString,prePickedString)) {
+            if(fragment instanceof filterListFragment)
+                ((filterListFragment) fragment).showList(allInfo);
+            else if(fragment instanceof chartFragment)
+                ((chartFragment)fragment).showChart(allInfo);
+        }
+        else{
+            if(fragment instanceof filterListFragment)
+                ((filterListFragment) fragment).updateList();
+            else if(fragment instanceof chartFragment)
+                ((chartFragment)fragment).updateChart();
+        }
     }
 
     private boolean isPickTagSame(ArrayList<String> a,ArrayList<String> b) {

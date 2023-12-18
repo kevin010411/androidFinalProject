@@ -1,6 +1,7 @@
 package com.example.crawler.Fragment;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.crawler.R;
 import com.example.crawler.cardComponent;
+import com.example.crawler.categoryActivity;
 import com.example.crawler.util.Crawler;
+import com.example.crawler.util.favoriteDB;
 import com.example.crawler.util.util;
 
 import org.jsoup.nodes.Document;
@@ -89,11 +92,7 @@ public class filterListFragment extends Fragment {
         });
         //test.setText("List正常創建");
     }
-
-    public void updateList() {
-        ArrayList<String> UrlList = filterListInterface.getUrlArray();
-        Log.i("Test", "updateList");
-        Vector<cardComponent> finalAllCard = getDataFromUrl(UrlList);
+    public void showList(Vector<cardComponent> showData) {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -101,11 +100,17 @@ public class filterListFragment extends Fragment {
                 cardContainer = getView().findViewById(R.id.cardContainer);
                 cardContainer.setLayoutManager(new GridLayoutManager(getActivity().getApplicationContext(), 1));
                 cardContainer.addItemDecoration(new DividerItemDecoration(getActivity().getApplicationContext(), DividerItemDecoration.VERTICAL));
-                cardAdapter = new FilterFragmentAdapter(finalAllCard);
+                cardAdapter = new FilterFragmentAdapter(showData);
                 cardContainer.setAdapter(cardAdapter);
 
             }
         });
+    }
+    public void updateList() {
+        ArrayList<String> UrlList = filterListInterface.getUrlArray();
+        Log.i("Test", "updateList");
+        getDataFromUrl(UrlList);
+        showList(allCard);
     }
 
     private Vector<cardComponent> getDataFromUrl(ArrayList<String> UrlList) {
@@ -184,6 +189,14 @@ public class filterListFragment extends Fragment {
         }
         if(allCard==null)
             allCard=new Vector<>();
+        if(filterListInterface instanceof  categoryActivity) {
+            favoriteDB DB = ((categoryActivity) filterListInterface).DataBase;
+            for(int i=0;i<allCard.size();++i){
+                if(DB.hasInData(allCard.get(i)))
+                    allCard.get(i).FavoriteButton.setChipIconResource(R.drawable.favorite);
+            }
+        }
+
         return allCard;
     }
 }

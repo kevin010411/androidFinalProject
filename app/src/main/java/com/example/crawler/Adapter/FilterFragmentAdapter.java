@@ -21,11 +21,14 @@ public class FilterFragmentAdapter extends RecyclerView.Adapter<FilterFragmentAd
     public FilterFragmentAdapter(Vector<cardComponent> all)
     {
         allCard=all;
+        if(allCard==null)
+            allCard=new Vector<>();
     }
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = new cardComponent(parent.getContext());
+
         return new ViewHolder(view);
     }
 

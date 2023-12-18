@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.crawler.R;
 import com.example.crawler.cardComponent;
+import com.example.crawler.categoryActivity;
 import com.example.crawler.util.Crawler;
 import com.example.crawler.util.util;
 import com.github.mikephil.charting.charts.BarChart;
@@ -78,16 +79,15 @@ public class chartFragment extends Fragment {
             allCard=tempCard;
         else
             allCard=new Vector<>();
-
-        showChart();
+        showChart(allCard);
         test.setText("Chart正常創建");
     }
-    public void showChart()
+    public void showChart(Vector<cardComponent> CardContainer)
     {
         List<BarEntry> displayData = new ArrayList<>();
         xAxisString=new Vector<>();
         CountDay = new HashMap<>();
-        for(cardComponent card : allCard)
+        for(cardComponent card : CardContainer)
         {
             String DayName = card.deadLine.getText().toString();
             int time = util.ChangeTimeToSec(DayName);
@@ -156,7 +156,7 @@ public class chartFragment extends Fragment {
     public void updateChart()
     {
         getDataFromUrl(filterListInterface.getUrlArray());
-        showChart();
+        showChart(allCard);
     }
 
     private Vector<cardComponent> getDataFromUrl(ArrayList<String> UrlList) {
